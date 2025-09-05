@@ -85,7 +85,6 @@ class WellDataGenerator:
         }
     def generate_fluid_properties(self, n_wells, reservoir_temp):
         print("Generating fluid properties...")
-
         # Oil gravity (API) 
         oil_gravity = np.random.normal(35, 8, n_wells)
         oil_gravity = np.clip(oil_gravity, 15, 50)
@@ -119,16 +118,15 @@ class WellDataGenerator:
         h = reservoir_props['thickness_ft'] * reservoir_props['net_to_gross']
         mu = fluids['oil_viscosity_cp']
         B = fluids['fvf_oil']
-        
         # Simplified productivity index calculation
-        productivity_index = (0.007 * k * h) / (mu * B * 7)  # Assuming ln(re/rw)+S ≈ 7
+        productivity_index = (0.007 * k * h) / (mu * B * 7)  
         # Well type multiplier
         well_type_multiplier = np.ones(n_wells)
         horizontal_mask = well_design['well_type'] == 'Horizontal'
-        well_type_multiplier[horizontal_mask] *= 3  # Horizontal wells more productive
+        well_type_multiplier[horizontal_mask] *= 3 
         deviated_mask = well_design['well_type'] == 'Deviated'
-        well_type_multiplier[deviated_mask] *= 1.5  # Deviated wells moderately more productive
-        
+        well_type_multiplier[deviated_mask] *= 1.5 
+       
         # Completion efficiency
         completion_efficiency = np.ones(n_wells)
         completion_efficiency[well_design['completion_type'] == 'Perforated'] *= 0.8
@@ -258,10 +256,10 @@ class WellDataGenerator:
         current_date = datetime(2025, 1, 1)
         well_age_days = [(current_date - date).days for date in drill_dates]
         # Production months (time on production)
-        production_months = np.random.uniform(1, 48, n_wells)  # 1-48 months
+        production_months = np.random.uniform(1, 48, n_wells)  
         # Days since last workover
-        days_since_workover = np.random.exponential(180, n_wells)  # Average 6 months
-        days_since_workover = np.clip(days_since_workover, 30, 1095)  # 1 month to 3 years
+        days_since_workover = np.random.exponential(180, n_wells)  
+        days_since_workover = np.clip(days_since_workover, 30, 1095)  
         return {
             'drill_date': drill_dates,
             'well_age_days': well_age_days,
@@ -356,7 +354,7 @@ def create_visualization_report(filename='well_data.csv', output_file='data_summ
         if reason:
             ax.text(0.5, 0.5, reason, ha='center', va='center', fontsize=10, color='gray')
         return
-    # 1. Oil Production Rate Distribution (axes[0]) ---
+    # 1. Oil Production Rate Distribution 
     if 'oil_rate_bbl_day' in df.columns:
         axes[0].hist(df['oil_rate_bbl_day'].dropna(), bins=50, alpha=0.7, color='green', edgecolor='black')
         axes[0].set_title('Oil Production Rate Distribution', fontweight='bold')
@@ -365,7 +363,7 @@ def create_visualization_report(filename='well_data.csv', output_file='data_summ
         axes[0].grid(True, alpha=0.3)
     else:
         safe_hide(axes[0], 'Missing: oil_rate_bbl_day')
-    # 2. Reservoir Quality vs Production (axes[1]) ---
+    # 2. Reservoir Quality vs Production 
     if {'permeability_md', 'porosity_fraction', 'oil_rate_bbl_day'}.issubset(df.columns):
         sc = axes[1].scatter(df['permeability_md'], df['porosity_fraction'],
                              c=df['oil_rate_bbl_day'], alpha=0.6, s=30, cmap='viridis')
@@ -376,7 +374,7 @@ def create_visualization_report(filename='well_data.csv', output_file='data_summ
         plt.colorbar(sc, ax=axes[1], label='Oil Rate (bbl/day)')
     else:
         safe_hide(axes[1], 'Missing: permeability_md / porosity_fraction')
-    # 3. Water Cut Impact on Production (axes[2]) ---
+    # 3. Water Cut Impact on Production 
     if {'water_cut_fraction', 'oil_rate_bbl_day'}.issubset(df.columns):
         axes[2].scatter(df['water_cut_fraction'], df['oil_rate_bbl_day'], alpha=0.6, color='red')
         axes[2].set_title('Water Cut Impact on Production', fontweight='bold')
@@ -385,7 +383,7 @@ def create_visualization_report(filename='well_data.csv', output_file='data_summ
         axes[2].grid(True, alpha=0.3)
     else:
         safe_hide(axes[2], 'Missing: water_cut_fraction')
-    # 4. Production by Artificial Lift (boxplot) (axes[3]) ---
+    # 4. Production by Artificial Lift 
     if {'artificial_lift', 'oil_rate_bbl_day'}.issubset(df.columns):
         lifts = df['artificial_lift'].dropna().unique()
         # ensure deterministic ordering: put common lifts in expected order if present
@@ -633,4 +631,5 @@ def main():
     print("  - well_data_mature_field.csv (300 wells)")
     print("  - standard_dataset_analysis.png (visualization report)")
 if __name__ == "__main__":
+
     main()
